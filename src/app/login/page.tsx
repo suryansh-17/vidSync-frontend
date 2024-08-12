@@ -1,9 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,6 +15,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { login } from "@/services/auth/authServices";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
 
 const formSchema = z.object({
   identifier: z.string().min(1, {
@@ -38,21 +40,25 @@ export default function LoginPage() {
     },
   });
 
+  const dispatch = useAppDispatch();
+  const router = useRouter(); // Initialize the router
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const response = await fetch(
-        "https://your-api-endpoint.com/api/v1/users/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
-      const data = await response.json();
-      console.log(data);
-      // Handle success
+      const payload = {
+        [isEmail ? "email" : "username"]: values.identifier,
+        password: values.password,
+      };
+
+      const res = await login(dispatch, payload);
+      console.log(res);
+      if (res) {
+        // Check if the login was successful
+        router.push("/explore"); // Navigate to /explore on success
+      } else {
+        // Handle unsuccessful login
+        console.error("Login failed");
+      }
     } catch (error) {
       console.error("Error:", error);
       // Handle error

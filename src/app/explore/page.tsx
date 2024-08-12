@@ -11,8 +11,24 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/lib/store/hooks";
+import { logout } from "@/services/auth/authServices";
 
 export default function SidebarDemo() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const handleLogout = async () => {
+    const success = await logout(dispatch);
+    if (success) {
+      // Redirect to login page or show logout success message
+      router.push("/login");
+    } else {
+      // Show error message
+      console.error("Logout failed");
+    }
+  };
   const links = [
     {
       label: "Dashboard",
@@ -37,6 +53,7 @@ export default function SidebarDemo() {
       icon: (
         <IconArrowLeft className="text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
+      onClick: handleLogout,
     },
   ];
   const [open, setOpen] = useState(false);
