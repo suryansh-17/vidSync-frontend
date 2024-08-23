@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
 import authReducer, { AuthState } from "./features/authSlice";
+import userReducer, { User } from "./features/userSlice";
 
 const getInitialAuthState = (): AuthState => {
   if (typeof window !== "undefined") {
@@ -18,6 +19,7 @@ export const makeStore = () => {
   return configureStore({
     reducer: {
       auth: authReducer,
+      user: userReducer,
       // ... other reducers
     },
     preloadedState: {

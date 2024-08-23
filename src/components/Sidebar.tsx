@@ -12,7 +12,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useAppDispatch } from "@/lib/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/lib/store/hooks";
 import { logout } from "@/services/auth/authServices";
 
 interface SidebarDemoProps {
@@ -22,6 +22,8 @@ interface SidebarDemoProps {
 export default function SidebarDemo({ children }: SidebarDemoProps) {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.user);
+
   const handleLogout = async () => {
     const success = await logout(dispatch);
     if (success) {
@@ -30,6 +32,7 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
       console.error("Logout failed");
     }
   };
+
   const links = [
     {
       label: "Dashboard",
@@ -57,11 +60,13 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
       onClick: handleLogout,
     },
   ];
+
   const [open, setOpen] = useState(false);
+
   return (
     <div
       className={cn(
-        "rounded-none flex flex-col md:flex-row bg-neutral-800 w-full flex-1  mx-auto border border-neutral-700 overflow-hidden",
+        "rounded-none flex flex-col md:flex-row bg-neutral-800 w-full flex-1 mx-auto border border-neutral-700 overflow-hidden",
         "h-screen w-screen"
       )}
     >
@@ -78,16 +83,18 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
           <div>
             <SidebarLink
               link={{
-                label: "Manu Arora",
+                label: user.fullName || "User",
                 href: "#",
-                icon: (
+                icon: user.avatar ? (
                   <Image
-                    src=""
+                    src={user.avatar}
                     className="h-7 w-7 flex-shrink-0 rounded-full"
                     width={50}
                     height={50}
                     alt="Avatar"
                   />
+                ) : (
+                  <div className="h-7 w-7 flex-shrink-0 rounded-full bg-gray-500"></div>
                 ),
               }}
             />
@@ -115,7 +122,7 @@ const Logo = () => {
         animate={{ opacity: 1 }}
         className="font-medium text-white whitespace-pre"
       >
-        Acet Labs
+        vidSync
       </motion.span>
     </Link>
   );

@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -16,26 +15,41 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Loader from "@/components/Loader"; // Assuming you have a reusable Loader component
 
-const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
-  fullName: z.string().min(2, {
-    message: "Full name must be at least 2 characters.",
-  }),
-  avatar: z.any().optional(),
-  coverImage: z.any().optional(),
-});
+// Form Schema with confirmPassword validation
+const formSchema = z
+  .object({
+    username: z.string().min(2, {
+      message: "Username must be at least 2 characters.",
+    }),
+    email: z.string().email({
+      message: "Please enter a valid email address.",
+    }),
+    password: z.string().min(6, {
+      message: "Password must be at least 6 characters.",
+    }),
+    confirmPassword: z.string().min(6, {
+      message: "Please confirm your password.",
+    }),
+    fullName: z.string().min(2, {
+      message: "Full name must be at least 2 characters.",
+    }),
+    avatar: z.any().optional(),
+    coverImage: z.any().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false); // State for loader
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,6 +57,7 @@ export default function SignupPage() {
       username: "",
       email: "",
       password: "",
+      confirmPassword: "",
       fullName: "",
     },
   });
@@ -63,6 +78,7 @@ export default function SignupPage() {
     });
 
     try {
+      setLoading(true); // Show loader
       const response = await fetch(
         "https://elwi9xjnlh.execute-api.ap-south-1.amazonaws.com/api/v1/users/register",
         {
@@ -72,17 +88,30 @@ export default function SignupPage() {
       );
       const data = await response.json();
       console.log(data);
-      // Handle success
+
+      if (response.ok) {
+        toast.success("Account created successfully! Please login.");
+        setTimeout(() => {
+          router.push("/login");
+        }, 1500); // Adjust the delay as needed
+      } else {
+        toast.error(
+          data.message || "Failed to create account. Please try again."
+        );
+      }
     } catch (error) {
       console.error("Error:", error);
-      // Handle error
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setLoading(false); // Hide loader
     }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-r from-gray-700 via-gray-900 to-black flex items-center justify-center">
-      <div className="max-w-4xl w-full p-8 bg-gray-800 text-white rounded-lg shadow-lg">
+      <div className="max-w-4xl w-full p-8 bg-gray-800 text-white rounded-lg shadow-lg relative">
         <h1 className="text-3xl font-bold mb-8 text-center">Sign Up</h1>
+        {loading && <Loader />} {/* Show loader when loading */}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -138,6 +167,33 @@ export default function SignupPage() {
                         className="text-black"
                         type={showPassword ? "text" : "password"}
                         placeholder="Enter your password"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
+                      >
+                        {showPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Re-enter Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        className="text-black"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Re-enter your password"
                         {...field}
                       />
                       <button
@@ -217,12 +273,22 @@ export default function SignupPage() {
                 type="submit"
                 variant="secondary"
                 className="w-full py-3 text-lg font-semibold"
+                disabled={loading} // Disable button while loading
               >
-                Sign Up
+                {loading ? "Signing Up..." : "Sign Up"}
               </Button>
+            </div>
+            <div className="md:col-span-2 text-center mt-4">
+              <p className="text-gray-400">
+                Already a user?{" "}
+                <a href="/login" className="text-blue-400 hover:underline">
+                  Login here
+                </a>
+              </p>
             </div>
           </form>
         </Form>
+        <ToastContainer theme="dark" /> {/* Toastify container */}
       </div>
     </div>
   );
