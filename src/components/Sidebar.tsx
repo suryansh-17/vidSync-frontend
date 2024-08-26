@@ -43,7 +43,7 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
     },
     {
       label: "Profile",
-      href: "#",
+      href: `/profile`,
       icon: <IconUserBolt className="text-neutral-200 h-5 w-5 flex-shrink-0" />,
     },
     {
@@ -67,12 +67,12 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
     <div
       className={cn(
         "rounded-none flex flex-col md:flex-row bg-neutral-800 w-full flex-1 mx-auto border border-neutral-700 overflow-hidden",
-        "h-screen w-screen"
+        "h-screen"
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        <SidebarBody className="flex flex-col h-full overflow-y-auto">
+          <div className="flex flex-col flex-1 overflow-y-auto">
             {open ? <Logo /> : <LogoIcon />}
             <div className="mt-8 flex flex-col gap-2">
               {links.map((link, idx) => (
@@ -101,8 +101,8 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
           </div>
         </SidebarBody>
       </Sidebar>
-      <div className="flex flex-1">
-        <div className="p-2 md:p-10 rounded-tl-2xl border border-neutral-700 bg-neutral-900 flex flex-col gap-2 flex-1 w-full h-full">
+      <div className="flex flex-1 ">
+        <div className=" rounded-tl-2xl border border-neutral-700 bg-neutral-900 flex flex-col gap-2 flex-1 overflow-y-auto">
           {children}
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function SidebarDemo({ children }: SidebarDemoProps) {
 const Logo = () => {
   return (
     <Link
-      href="#"
+      href="/explore"
       className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
     >
       <div className="h-5 w-6 bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />

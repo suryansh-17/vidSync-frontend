@@ -288,7 +288,7 @@ export default function SignupPage() {
             </div>
           </form>
         </Form>
-        <ToastContainer theme="dark" /> {/* Toastify container */}
+        <ToastContainer theme="dark" />
       </div>
     </div>
   );
